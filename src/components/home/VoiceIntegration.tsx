@@ -1,9 +1,57 @@
 
-import React from 'react';
-import { Volume2, Languages } from 'lucide-react';
+import React, { useState } from 'react';
+import { Volume2, Languages, Play, Pause } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 const VoiceIntegration = () => {
+  const [isPlayingEnglish, setIsPlayingEnglish] = useState(false);
+  const [isPlayingTamil, setIsPlayingTamil] = useState(false);
+  const { toast } = useToast();
+  
+  const handlePlayEnglish = () => {
+    if (isPlayingEnglish) {
+      setIsPlayingEnglish(false);
+      toast({
+        title: "Voice instruction stopped",
+        description: "English voice instruction has been paused",
+      });
+    } else {
+      setIsPlayingEnglish(true);
+      toast({
+        title: "Voice instruction playing",
+        description: "Playing recipe instructions in English (demo)",
+      });
+      
+      // Simulate voice playback timing
+      setTimeout(() => {
+        setIsPlayingEnglish(false);
+      }, 5000);
+    }
+  };
+  
+  const handlePlayTamil = () => {
+    if (isPlayingTamil) {
+      setIsPlayingTamil(false);
+      toast({
+        title: "Voice instruction stopped",
+        description: "Tamil voice instruction has been paused",
+      });
+    } else {
+      setIsPlayingTamil(true);
+      toast({
+        title: "Voice instruction playing",
+        description: "Playing recipe instructions in Tamil (demo)",
+      });
+      
+      // Simulate voice playback timing
+      setTimeout(() => {
+        setIsPlayingTamil(false);
+      }, 5000);
+    }
+  };
+
   return (
     <section className="py-16 bg-cookblue-50 dark:bg-gray-800/50">
       <div className="container mx-auto px-4">
@@ -23,9 +71,16 @@ const VoiceIntegration = () => {
                 <Volume2 size={32} className="text-cookblue-600 dark:text-cookblue-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Voice Instructions</h3>
-              <p className="text-center text-gray-600 dark:text-gray-300">
+              <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
                 Listen to recipe instructions step by step, allowing you to cook without having to read or touch your device.
               </p>
+              <Button 
+                className="bg-cookblue-500 hover:bg-cookblue-600"
+                onClick={handlePlayEnglish}
+              >
+                {isPlayingEnglish ? <Pause className="mr-2" /> : <Play className="mr-2" />}
+                {isPlayingEnglish ? 'Stop English Sample' : 'Play English Sample'}
+              </Button>
             </CardContent>
           </Card>
 
@@ -35,9 +90,16 @@ const VoiceIntegration = () => {
                 <Languages size={32} className="text-cookblue-600 dark:text-cookblue-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Multilingual Support</h3>
-              <p className="text-center text-gray-600 dark:text-gray-300">
+              <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
                 Instructions are available in both Tamil and English, making cooking accessible to a wider audience.
               </p>
+              <Button 
+                className="bg-cookblue-500 hover:bg-cookblue-600"
+                onClick={handlePlayTamil}
+              >
+                {isPlayingTamil ? <Pause className="mr-2" /> : <Play className="mr-2" />}
+                {isPlayingTamil ? 'Stop Tamil Sample' : 'Play Tamil Sample'}
+              </Button>
             </CardContent>
           </Card>
         </div>

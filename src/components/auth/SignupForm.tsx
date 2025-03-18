@@ -31,24 +31,25 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
       return;
     }
     
+    if (!username || !email || password.length < 6) {
+      toast({
+        title: "Signup failed",
+        description: "Please fill in all required fields. Password must be at least 6 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      if (username && email && password) {
-        toast({
-          title: "Account created successfully",
-          description: "Welcome to CookAI!",
-        });
-        onSuccess();
-      } else {
-        toast({
-          title: "Signup failed",
-          description: "Please fill in all required fields.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Account created successfully",
+        description: "Welcome to CookAI!",
+      });
+      onSuccess();
     }, 1000);
   };
 
@@ -103,6 +104,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
             />
           </div>
           <div className="space-y-2">

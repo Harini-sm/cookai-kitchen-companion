@@ -21,10 +21,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
+    // Validate email and password properly
     setTimeout(() => {
       setIsLoading(false);
-      if (email && password) {
+      if (email && password && password.length >= 6) {
         toast({
           title: "Login successful",
           description: "Welcome back to CookAI!",
@@ -43,7 +43,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const handleGoogleLogin = () => {
     setIsLoading(true);
     
-    // Simulate API call
+    // Simulate API call with more delay
     setTimeout(() => {
       setIsLoading(false);
       toast({

@@ -11,6 +11,7 @@ interface FeatureCardProps {
   icon: React.ReactNode;
   link: string;
   imageSrc: string;
+  buttonText?: string;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({
@@ -19,6 +20,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   icon,
   link,
   imageSrc,
+  buttonText = "Explore",
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -45,7 +47,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           asChild
         >
           <Link to={link}>
-            Explore <ChevronRight size={16} />
+            {buttonText} <ChevronRight size={16} />
           </Link>
         </Button>
       </CardFooter>

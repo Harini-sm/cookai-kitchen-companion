@@ -1,31 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import FeatureCard from './FeatureCard';
 import { Apple, Utensils, Scale } from 'lucide-react';
 
-const featureImages = [
-  'https://images.unsplash.com/photo-1542838132-92c53300491e',
-  'https://images.unsplash.com/photo-1511690656952-34342bb7c2f2',
-  'https://images.unsplash.com/photo-1490645935967-10de6ba17061'
-];
-
 const Features = () => {
-  const [currentImageIndexes, setCurrentImageIndexes] = useState([0, 0, 0]);
-  
-  useEffect(() => {
-    const intervals = featureImages.map((_, index) => {
-      return setInterval(() => {
-        setCurrentImageIndexes(prev => {
-          const newIndexes = [...prev];
-          newIndexes[index] = (prev[index] + 1) % featureImages.length;
-          return newIndexes;
-        });
-      }, 4000 + (index * 1000)); // Staggered timing for each slideshow
-    });
-    
-    return () => intervals.forEach(interval => clearInterval(interval));
-  }, []);
-
   return (
     <section className="py-16 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4">
@@ -44,21 +22,24 @@ const Features = () => {
             description="Generate delicious recipes using ingredients you already have at home. No more wasted food or unnecessary shopping trips."
             icon={<Apple className="text-cookblue-500" size={20} />}
             link="/pantry-prodigy"
-            imageSrc={featureImages[currentImageIndexes[0]]}
+            imageSrc="https://images.unsplash.com/photo-1542838132-92c53300491e"
+            buttonText="Explore Pantry"
           />
           <FeatureCard
             title="Plate Prodigy"
             description="Discover recipes that match your taste preferences and dietary requirements. From vegan to keto, we've got you covered."
             icon={<Utensils className="text-cookblue-500" size={20} />}
             link="/plate-prodigy"
-            imageSrc={featureImages[currentImageIndexes[1]]}
+            imageSrc="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2"
+            buttonText="Explore Plate"
           />
           <FeatureCard
             title="Nutrient Prodigy"
             description="Meet your macronutrient goals with recipes optimized for your dietary needs. Perfect for fitness enthusiasts and health-conscious cooks."
             icon={<Scale className="text-cookblue-500" size={20} />}
             link="/nutrient-prodigy"
-            imageSrc={featureImages[currentImageIndexes[2]]}
+            imageSrc="https://images.unsplash.com/photo-1490645935967-10de6ba17061"
+            buttonText="Explore Nutrient"
           />
         </div>
       </div>
