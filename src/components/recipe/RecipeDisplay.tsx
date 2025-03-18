@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Volume2, Heart, Share, Utensils, Clock, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Volume2, Heart, Share, Utensils, Clock, ChevronRight, ChevronLeft, Languages, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
+import { useSpeechService, Language } from '@/services/speechService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Ingredient {
   name: string;
@@ -45,19 +47,66 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(Language.ENGLISH);
   const { toast } = useToast();
+  const { speak, stop, isSpeaking, isSupported } = useSpeechService();
 
-  const playVoiceInstructions = () => {
-    setIsPlayingVoice(true);
-    toast({
-      title: "Voice Instructions",
-      description: `Playing step ${currentStep + 1} in Tamil and English`,
-    });
-    
-    // Simulate voice playing
-    setTimeout(() => {
+  const playVoiceInstructions = async () => {
+    if (isPlayingVoice) {
+      stop();
       setIsPlayingVoice(false);
-    }, 3000);
+      toast({
+        title: "Voice Instructions Stopped",
+        description: "Voice playback has been stopped",
+      });
+      return;
+    }
+
+    setIsPlayingVoice(true);
+    
+    try {
+      // Get current step instruction
+      const instruction = steps[currentStep].instruction;
+      
+      toast({
+        title: "Voice Instructions",
+        description: `Playing step ${currentStep + 1} in ${currentLanguage === Language.ENGLISH ? 'English' : 'Tamil'}`,
+      });
+      
+      // For Tamil, this would normally be translated through a service
+      // Here we're just appending a note for demo purposes
+      const translatedInstruction = currentLanguage === Language.TAMIL 
+        ? `தமிழ் மொழியில் படி ${currentStep + 1}: ${instruction}` 
+        : instruction;
+      
+      await speak({
+        text: translatedInstruction,
+        language: currentLanguage,
+        rate: currentLanguage === Language.TAMIL ? 0.9 : 1, // Slightly slower for Tamil
+      });
+      
+      setIsPlayingVoice(false);
+    } catch (error) {
+      console.error("Voice playback error:", error);
+      setIsPlayingVoice(false);
+    }
+  };
+
+  const toggleLanguage = () => {
+    // If currently speaking, stop first
+    if (isPlayingVoice) {
+      stop();
+      setIsPlayingVoice(false);
+    }
+    
+    setCurrentLanguage(
+      currentLanguage === Language.ENGLISH ? Language.TAMIL : Language.ENGLISH
+    );
+    
+    toast({
+      title: "Language Changed",
+      description: `Voice language set to ${currentLanguage === Language.ENGLISH ? 'Tamil' : 'English'}`,
+    });
   };
 
   const toggleFavorite = () => {
@@ -77,12 +126,22 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
+      // If voice is playing, stop it when changing steps
+      if (isPlayingVoice) {
+        stop();
+        setIsPlayingVoice(false);
+      }
       setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 0) {
+      // If voice is playing, stop it when changing steps
+      if (isPlayingVoice) {
+        stop();
+        setIsPlayingVoice(false);
+      }
       setCurrentStep(currentStep - 1);
     }
   };
@@ -179,17 +238,39 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold text-lg">Instructions</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={playVoiceInstructions}
-                disabled={isPlayingVoice}
-              >
-                <Volume2 size={16} />
-                <span>{isPlayingVoice ? "Playing..." : "Play Voice"}</span>
-              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={toggleLanguage}
+                  disabled={!isSupported}
+                >
+                  <Languages size={16} />
+                  <span>{currentLanguage === Language.ENGLISH ? "Tamil" : "English"}</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={playVoiceInstructions}
+                  disabled={!isSupported}
+                >
+                  <Volume2 size={16} />
+                  <span>{isPlayingVoice ? "Stop" : "Play Voice"}</span>
+                </Button>
+              </div>
             </div>
+
+            {!isSupported && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Your browser doesn't support voice synthesis. Please try a modern browser.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="border rounded-md p-4 min-h-[200px] mb-4 relative">
               <div className="absolute top-2 right-2 text-sm text-gray-500">
