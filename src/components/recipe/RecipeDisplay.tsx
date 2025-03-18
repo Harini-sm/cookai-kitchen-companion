@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Volume2, Heart, Share, Utensils, Clock, ChevronRight, ChevronLeft, Languages, AlertTriangle } from 'lucide-react';
@@ -51,6 +50,39 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
   const { toast } = useToast();
   const { speak, stop, isSpeaking, isSupported } = useSpeechService();
 
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, [stop]);
+
+  const getTamilTranslation = (englishText: string): string => {
+    const translations: Record<string, string> = {
+      'boil': 'கொதிக்க',
+      'cook': 'சமைக்க',
+      'pasta': 'பாஸ்தா',
+      'add': 'சேர்க்க',
+      'water': 'தண்ணீர்',
+      'minutes': 'நிமிடங்கள்',
+      'heat': 'வெப்பம்',
+      'stir': 'கலக்கவும்',
+      'mix': 'கலவை',
+      'pan': 'வாணலி',
+      'bowl': 'கிண்ணம்',
+      'cut': 'வெட்டவும்',
+      'chop': 'நறுக்கவும்'
+    };
+    
+    let tamilText = englishText;
+    
+    Object.entries(translations).forEach(([english, tamil]) => {
+      const regex = new RegExp(`\\b${english}\\b`, 'gi');
+      tamilText = tamilText.replace(regex, tamil);
+    });
+    
+    return `தமிழ் மொழிபெயர்ப்பு: ${tamilText}`;
+  };
+
   const playVoiceInstructions = async () => {
     if (isPlayingVoice) {
       stop();
@@ -65,7 +97,6 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
     setIsPlayingVoice(true);
     
     try {
-      // Get current step instruction
       const instruction = steps[currentStep].instruction;
       
       toast({
@@ -73,14 +104,12 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
         description: `Playing step ${currentStep + 1} in ${currentLanguage === Language.ENGLISH ? 'English' : 'Tamil'}`,
       });
       
-      // For Tamil, this would normally be translated through a service
-      // Here we're just appending a note for demo purposes
-      const translatedInstruction = currentLanguage === Language.TAMIL 
-        ? `தமிழ் மொழியில் படி ${currentStep + 1}: ${instruction}` 
+      const textToSpeak = currentLanguage === Language.TAMIL 
+        ? getTamilTranslation(instruction) 
         : instruction;
       
       await speak({
-        text: translatedInstruction,
+        text: textToSpeak,
         language: currentLanguage,
         rate: currentLanguage === Language.TAMIL ? 0.9 : 1, // Slightly slower for Tamil
       });
@@ -93,7 +122,6 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
   };
 
   const toggleLanguage = () => {
-    // If currently speaking, stop first
     if (isPlayingVoice) {
       stop();
       setIsPlayingVoice(false);
@@ -126,7 +154,6 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
-      // If voice is playing, stop it when changing steps
       if (isPlayingVoice) {
         stop();
         setIsPlayingVoice(false);
@@ -137,7 +164,6 @@ const RecipeDisplay: React.FC<RecipeProps> = ({
 
   const prevStep = () => {
     if (currentStep > 0) {
-      // If voice is playing, stop it when changing steps
       if (isPlayingVoice) {
         stop();
         setIsPlayingVoice(false);

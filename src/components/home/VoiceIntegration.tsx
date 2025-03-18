@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Volume2, Languages, Play, Pause, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,10 +13,18 @@ const VoiceIntegration = () => {
   const { toast } = useToast();
   const { speak, stop, isSupported } = useSpeechService();
   
+  // Sample text examples
   const sampleEnglishText = "First, bring a large pot of salted water to a boil. Add pasta and cook according to package instructions until al dente. Meanwhile, in a large skillet, melt butter over medium heat. Add minced garlic and sauté until fragrant, but not browned.";
   
   const sampleTamilText = "முதலில், உப்பு சேர்த்த அதிக அளவு தண்ணீரை கொதிக்க விடவும். பாஸ்தாவை சேர்த்து பேக்கேஜ் அறிவுறுத்தல்களின்படி அல் டெண்டே வரை சமைக்கவும். அதே நேரத்தில், ஒரு பெரிய கிடைமட்ட வாணலியில், நடுத்தர வெப்பத்தில் வெண்ணெய் உருக்கவும். நறுக்கிய பூண்டு சேர்த்து மணம் வரும் வரை, ஆனால் பழுப்பு நிறமாகாமல் வதக்கவும்.";
   
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, [stop]);
+
   const handlePlayEnglish = async () => {
     if (isPlayingEnglish) {
       stop();

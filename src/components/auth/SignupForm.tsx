@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,25 +17,52 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = () => {
+    if (!username || username.length < 3) {
+      toast({
+        title: "Invalid username",
+        description: "Username must be at least 3 characters",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (!password || password.length < 6) {
+      toast({
+        title: "Invalid password",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return false;
+    }
     
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
+        description: "Please make sure your passwords match",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     
-    if (!username || !email || password.length < 6) {
-      toast({
-        title: "Signup failed",
-        description: "Please fill in all required fields. Password must be at least 6 characters.",
-        variant: "destructive",
-      });
+    return true;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
     
@@ -49,6 +75,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
         title: "Account created successfully",
         description: "Welcome to CookAI!",
       });
+      // Save login state
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userEmail', email);
       onSuccess();
     }, 1000);
   };
@@ -63,6 +92,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
         title: "Google signup successful",
         description: "Welcome to CookAI!",
       });
+      // Save login state
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userEmail', 'google-user@example.com');
       onSuccess();
     }, 1000);
   };

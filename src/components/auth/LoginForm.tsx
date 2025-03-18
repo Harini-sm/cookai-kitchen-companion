@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,24 +16,58 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const validateCredentials = () => {
+    // Basic validation
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (!password || password.length < 6) {
+      toast({
+        title: "Invalid password",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateCredentials()) {
+      return;
+    }
+    
     setIsLoading(true);
     
-    // Validate email and password properly
+    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      if (email && password && password.length >= 6) {
+      
+      // Demo credentials for testing - in a real app this would be handled by a backend
+      if (email === 'demo@example.com' && password === 'password123') {
         toast({
           title: "Login successful",
           description: "Welcome back to CookAI!",
         });
+        // Save login state
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
         onSuccess();
       } else {
         toast({
           title: "Login failed",
-          description: "Please check your credentials and try again.",
+          description: "Invalid email or password. Try the demo account: demo@example.com / password123",
           variant: "destructive",
         });
       }
@@ -43,13 +77,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const handleGoogleLogin = () => {
     setIsLoading(true);
     
-    // Simulate API call with more delay
+    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       toast({
         title: "Google login successful",
         description: "Welcome back to CookAI!",
       });
+      // Save login state
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userEmail', 'google-user@example.com');
       onSuccess();
     }, 1000);
   };

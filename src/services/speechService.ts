@@ -51,24 +51,47 @@ export const useSpeechService = () => {
       utterance.pitch = pitch;
       utterance.volume = volume;
       
-      setIsSpeaking(true);
+      // Get available voices
+      let voices = window.speechSynthesis.getVoices();
       
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        resolve();
-      };
+      // If voices aren't loaded yet, wait for them
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          voices = window.speechSynthesis.getVoices();
+          completeSetup();
+        };
+      } else {
+        completeSetup();
+      }
       
-      utterance.onerror = (event) => {
-        setIsSpeaking(false);
-        toast({
-          title: "Speech Error",
-          description: `An error occurred: ${event.error}`,
-          variant: "destructive",
-        });
-        reject(new Error(`Speech synthesis error: ${event.error}`));
-      };
-      
-      window.speechSynthesis.speak(utterance);
+      function completeSetup() {
+        // Find appropriate voice for the language
+        const availableVoices = voices.filter(voice => voice.lang.startsWith(language === Language.TAMIL ? 'ta' : 'en'));
+        
+        if (availableVoices.length > 0) {
+          utterance.voice = availableVoices[0];
+        }
+        
+        setIsSpeaking(true);
+        
+        utterance.onend = () => {
+          setIsSpeaking(false);
+          resolve();
+        };
+        
+        utterance.onerror = (event) => {
+          setIsSpeaking(false);
+          console.error("Speech synthesis error:", event);
+          toast({
+            title: "Speech Error",
+            description: `An error occurred: ${event.error}`,
+            variant: "destructive",
+          });
+          reject(new Error(`Speech synthesis error: ${event.error}`));
+        };
+        
+        window.speechSynthesis.speak(utterance);
+      }
     });
   };
   
